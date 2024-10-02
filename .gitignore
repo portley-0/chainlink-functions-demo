@@ -1,0 +1,31 @@
+# Dependencies
+/node_modules
+
+# Build outputs
+/.next
+/build
+/out
+
+# Hardhat files
+/cache
+/artifacts
+
+# TypeChain files
+/typechain
+/typechain-types
+
+# Local environment files
+.env
+.env*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# Vercel
+.vercel
+
+# Package lock file
+package-lock.json

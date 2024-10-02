@@ -1,0 +1,49 @@
+{
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run build:css & npx next dev",
+    "build": "npm run build:css && npx next build",
+    "start": "npx next start",
+    "lint": "npx next lint",
+    "build:css": "npx tailwindcss -i ./app/styles/globals.css -o ./app/styles/tailwind.css --minify",
+    "watch:css": "npx tailwindcss -i ./app/styles/globals.css -o ./app/styles/tailwind.css --watch",
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "deploy:consumer": "npx hardhat run scripts/DeployConsumer.ts --network avalancheFuji",
+    "deploy:betting": "npx hardhat run scripts/DeployBetting.ts --network avalancheFuji",
+    "TestRequest": "npx hardhat run scripts/TestRequest.ts --network avalancheFuji"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^1.2.0",
+    "@chainlink/env-enc": "^1.0.5",
+    "@chainlink/functions-toolkit": "^0.3.2",
+    "dotenv": "^16.4.5",
+    "lucide-react": "^0.446.0",
+    "next": "^14.2.11",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-modal": "^3.16.1"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
+    "@nomicfoundation/hardhat-toolbox": "2.0.2",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@types/chai": "^4.3.6",
+    "@types/mocha": "^10.0.8",
+    "@types/node": "^20.16.5",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/react-modal": "^3.16.3",
+    "chai": "^4.3.6",
+    "daisyui": "^4.12.10",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.22.12",
+    "mocha": "^10.7.3",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  }
+}
