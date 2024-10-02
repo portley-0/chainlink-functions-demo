@@ -19,7 +19,6 @@ const Page = () => {
           </div>
         </div>
       </div>
-      {/* Gradient div */}
       <div className="h-4 bg-gradient-to-b from-transparent to-black"></div>
       <footer className="bg-black text-white py-1 px-2">
         <div className="-mt-2 pb-1 flex items-center justify-between">

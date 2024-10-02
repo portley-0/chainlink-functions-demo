@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "npm run build:css & npx next dev",
-    "build": "npm run build:css && npx next build",
+    "build": "npx hardhat compile && npx hardhat typechain && npm run build:css && next build",
     "start": "npx next start",
     "lint": "npx next lint",
     "build:css": "npx tailwindcss -i ./app/styles/globals.css -o ./app/styles/tailwind.css --minify",
