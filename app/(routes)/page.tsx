@@ -41,7 +41,7 @@ const Page = () => {
               className='mt-[2px]'
             />
           </div>
-          <a href="https://github.com/portley-0/" target="_blank" rel="noopener noreferrer" className="flex items-center">
+          <a href="https://github.com/portley-0/chainlink-functions-demo" target="_blank" rel="noopener noreferrer" className="flex items-center">
             <Image
               src="/Github-Icon.png"
               alt="GitHub Icon"
