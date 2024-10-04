@@ -52,6 +52,14 @@ contract SoccerBetting is AutomationCompatibleInterface {
     event MatchResolved(uint256 indexed matchId, Result result);
     event WinningsClaimed(uint256 indexed matchId, address indexed bettor, uint256 amount);
 
+    event LogCheckUpkeep(uint256 matchId, MatchState state, uint256 currentTime, uint256 startTime, uint256 resultRequestTime);
+    event LogPerformUpkeep(uint256 matchId, uint8 action);
+    event LogRequestResult(uint256 matchId, bool success);
+    event LogRetrieveResultAndPayout(uint256 matchId, uint8 resultValue, Result result);
+    event LogPayoutWinnings(uint256 matchId, uint256 winningPool, uint256 totalPayout);
+
+    event ReceivedPerformUpkeep(bytes performData);
+
     constructor(address _resultsConsumerAddress) {
         resultsConsumer = IResultsConsumer(_resultsConsumerAddress);
     }
@@ -113,41 +121,63 @@ contract SoccerBetting is AutomationCompatibleInterface {
     }
 
     function checkUpkeep(bytes calldata /* checkData */) external view override returns (bool upkeepNeeded, bytes memory performData) {
+        uint256[] memory eligibleMatches = new uint256[](activeGames.length);
+        uint256 count = 0;
+
         for (uint256 i = 0; i < activeGames.length; i++) {
             uint256 matchId = activeGames[i];
             Match storage gameMatch = matches[matchId];
             
-            if (gameMatch.state == MatchState.Active && block.timestamp >= gameMatch.startTime + MATCH_DURATION) {
-                return (true, abi.encode(matchId, uint8(0))); // Request result
+            if ((gameMatch.state == MatchState.Active && block.timestamp >= gameMatch.startTime + MATCH_DURATION) ||
+                (gameMatch.state == MatchState.ResultRequested && block.timestamp >= gameMatch.resultRequestTime + RESULT_REQUEST_DELAY)) {
+                eligibleMatches[count] = matchId;
+                count++;
             }
-            
-            if (gameMatch.state == MatchState.ResultRequested && block.timestamp >= gameMatch.resultRequestTime + RESULT_REQUEST_DELAY) {
-                return (true, abi.encode(matchId, uint8(1))); // Retrieve result and process payout
-            }
+        }
+
+        if (count > 0) {
+            return (true, abi.encode(eligibleMatches));
         }
         return (false, "");
     }
 
     function performUpkeep(bytes calldata performData) external override {
-        (uint256 matchId, uint8 action) = abi.decode(performData, (uint256, uint8));
-        
-        if (action == 0) {
-            _requestResult(matchId);
-        } else if (action == 1) {
-            _retrieveResultAndPayout(matchId);
+        emit ReceivedPerformUpkeep(performData);
+        uint256[] memory matchIds = abi.decode(performData, (uint256[]));
+
+        for (uint256 i = 0; i < matchIds.length; i++) {
+            uint256 matchId = matchIds[i];
+            if (matchId == 0) break; 
+
+            Match storage gameMatch = matches[matchId];
+
+            if (gameMatch.state == MatchState.Active && block.timestamp >= gameMatch.startTime + MATCH_DURATION) {
+                _requestResult(matchId);
+            } else if (gameMatch.state == MatchState.ResultRequested && block.timestamp >= gameMatch.resultRequestTime + RESULT_REQUEST_DELAY) {
+                _retrieveResultAndPayout(matchId);
+            }
         }
     }
+
 
     function _requestResult(uint256 matchId) internal {
         Match storage gameMatch = matches[matchId];
         require(gameMatch.state == MatchState.Active, "Match not in active state");
         require(block.timestamp >= gameMatch.startTime + MATCH_DURATION, "Match not finished yet");
 
-        resultsConsumer.requestMatchResult(matchId);
-        gameMatch.state = MatchState.ResultRequested;
-        gameMatch.resultRequestTime = block.timestamp;
-        
-        emit ResultRequested(matchId);
+        bool success = true;
+        try resultsConsumer.requestMatchResult(matchId) {
+        } catch {
+            success = false;
+        }
+
+        emit LogRequestResult(matchId, success);
+
+        if (success) {
+            gameMatch.state = MatchState.ResultRequested;
+            gameMatch.resultRequestTime = block.timestamp;
+            emit ResultRequested(matchId);
+        }
     }
 
     function _retrieveResultAndPayout(uint256 matchId) internal {
@@ -155,29 +185,36 @@ contract SoccerBetting is AutomationCompatibleInterface {
         require(gameMatch.state == MatchState.ResultRequested, "Result not requested");
         require(block.timestamp >= gameMatch.resultRequestTime + RESULT_REQUEST_DELAY, "Too early to retrieve result");
 
-        uint8 resultValue = resultsConsumer.returnResult(matchId);
-        require(resultValue <= 2, "Invalid result");
-
-        Result result = Result(resultValue);
-        gameMatch.result = result;
-        gameMatch.state = MatchState.Resolved;
-
-        emit MatchResolved(matchId, result);
-
-        _payoutWinnings(matchId);
-
-        
-        for (uint256 i = 0; i < activeGames.length; i++) {
-            if (activeGames[i] == matchId) {
-                activeGames[i] = activeGames[activeGames.length - 1];
-                activeGames.pop();
-                break;
-            }
+        uint8 resultValue;
+        bool success = true;
+        try resultsConsumer.returnResult(matchId) returns (uint8 _resultValue) {
+            resultValue = _resultValue;
+        } catch {
+            success = false;
         }
-        resolvedGames.push(matchId);
+
+        emit LogRetrieveResultAndPayout(matchId, resultValue, Result(resultValue));
+
+        if (success && resultValue <= 2) {
+            Result result = Result(resultValue);
+            gameMatch.result = result;
+            gameMatch.state = MatchState.Resolved;
+
+            emit MatchResolved(matchId, result);
+
+            _payoutWinnings(matchId);
+
+            for (uint256 i = 0; i < activeGames.length; i++) {
+                if (activeGames[i] == matchId) {
+                    activeGames[i] = activeGames[activeGames.length - 1];
+                    activeGames.pop();
+                    break;
+                }
+            }
+            resolvedGames.push(matchId);
+        }
     }
 
-    
     function _payoutWinnings(uint256 matchId) internal {
         Match storage gameMatch = matches[matchId];
         require(gameMatch.state == MatchState.Resolved, "Match not resolved");
@@ -190,6 +227,8 @@ contract SoccerBetting is AutomationCompatibleInterface {
         } else {
             winningPool = gameMatch.drawWagerAmount;
         }
+
+        emit LogPayoutWinnings(matchId, winningPool, gameMatch.totalWagerAmount);
 
         if (winningPool == 0) return; 
 
@@ -257,5 +296,4 @@ contract SoccerBetting is AutomationCompatibleInterface {
         
         return userResolvedBets;
     }
-
 }

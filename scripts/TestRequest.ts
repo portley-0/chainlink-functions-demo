@@ -9,7 +9,7 @@ async function main() {
   const ResultsConsumer = await ethers.getContractFactory("ResultsConsumer");
   const resultsConsumer = ResultsConsumer.attach(resultsConsumerAddress);
 
-  const matchId = 1208844// MatchId 
+  const matchId = 1208844
   console.log(`Requesting match result for matchId: ${matchId}`);
 
   const tx = await resultsConsumer.requestMatchResult(matchId);
@@ -17,7 +17,6 @@ async function main() {
 
   console.log("Transaction successful with hash:", receipt.transactionHash);
 
-  // Track RequestedResult event
   const requestedResultEvent = receipt.events?.filter((x: Event) => x.event === "RequestedResult");
   if (requestedResultEvent && requestedResultEvent.length > 0) {
     console.log(`RequestedResult event detected: Match ID: ${requestedResultEvent[0].args?.matchId}, Request ID: ${requestedResultEvent[0].args?.requestId}`);

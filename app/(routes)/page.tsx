@@ -10,19 +10,19 @@ const Page = () => {
     <div className="bg-darkblue min-h-screen flex flex-col">
       <div className="flex-grow flex flex-col items-center pt-5 px-3 pb-3">
         <TitleBar />
-        <div className="flex w-full mt-3 space-x-8 px-5 py-3">
-          <div className="w-2/3 bg-gray-800 rounded-xl p-3 h-[calc(100vh-13.5rem)] overflow-auto shadow-lg shadow-black">
+        <div className="flex flex-col md:flex-row w-full mt-3 space-y-4 md:space-y-0 md:space-x-4 px-2 md:px-5 py-3">
+          <div className="w-full md:w-2/3 bg-gray-800 rounded-xl p-3 h-[calc(50vh-8rem)] md:h-[calc(100vh-13.5rem)] overflow-auto shadow-lg shadow-black">
             <MatchList />
           </div>
-          <div className="w-1/3 bg-gray-800 rounded-xl p-3 h-[calc(100vh-13.5rem)] shadow-lg shadow-black">
+          <div className="w-full md:w-1/3 bg-gray-800 rounded-xl p-3 h-[calc(50vh-8rem)] md:h-[calc(100vh-13.5rem)] shadow-lg shadow-black">
             <Predictions />
           </div>
         </div>
       </div>
       <div className="h-4 bg-gradient-to-b from-transparent to-black"></div>
       <footer className="bg-black text-white py-1 px-2">
-        <div className="-mt-2 pb-1 flex items-center justify-between">
-          <div className="flex items-center">
+        <div className="flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0">
+          <div className="flex items-center flex-wrap justify-center md:justify-start">
             <p className="mr-2 text-base font-medium select-none">Powered by</p>
             <Image
               src="/Chainlink-Logo.png"
@@ -31,7 +31,7 @@ const Page = () => {
               height={40}
               className='mt-[2px]'
             />
-            <p className="mx-2 select-none">|</p>
+            <p className="mx-2 select-none hidden md:inline">|</p>
             <Image
               src="/Avalanche-Logo.png"
               alt="Avalanche Logo"
