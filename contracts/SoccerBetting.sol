@@ -3,7 +3,7 @@ pragma solidity ^0.8.7;
 
 import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol";
 
-interface IResultsConsumer {
+interface IResultsConsumer is AutomationCompatibleInterface {
     function requestMatchResult(uint256 matchId) external;
     function returnResult(uint256 matchId) external view returns (uint8);
 }
@@ -46,17 +46,15 @@ contract SoccerBetting is AutomationCompatibleInterface {
         bool claimed;
     }
 
-    event MatchCreated(uint256 indexed matchId, uint256 startTime);
-    event BetPlaced(uint256 indexed matchId, address indexed bettor, Result result, uint256 amount);
+    event MatchCreated(uint256 indexed matchId, uint256 indexed startTime);
+    event BetPlaced(uint256 indexed matchId, address indexed bettor, Result indexed result, uint256 amount);
     event ResultRequested(uint256 indexed matchId);
-    event MatchResolved(uint256 indexed matchId, Result result);
-    event WinningsClaimed(uint256 indexed matchId, address indexed bettor, uint256 amount);
+    event MatchResolved(uint256 indexed matchId, Result indexed result);
+    event WinningsClaimed(uint256 indexed matchId, address indexed bettor, uint256 indexed amount);
 
-    event LogCheckUpkeep(uint256 matchId, MatchState state, uint256 currentTime, uint256 startTime, uint256 resultRequestTime);
-    event LogPerformUpkeep(uint256 matchId, uint8 action);
-    event LogRequestResult(uint256 matchId, bool success);
-    event LogRetrieveResultAndPayout(uint256 matchId, uint8 resultValue, Result result);
-    event LogPayoutWinnings(uint256 matchId, uint256 winningPool, uint256 totalPayout);
+    event LogRequestResult(uint256 indexed matchId, bool indexed success);
+    event LogRetrieveResultAndPayout(uint256 indexed matchId, uint8 indexed resultValue, Result indexed result);
+    event LogPayoutWinnings(uint256 indexed matchId, uint256 indexed winningPool, uint256 indexed totalPayout);
 
     event ReceivedPerformUpkeep(bytes performData);
 
@@ -143,7 +141,8 @@ contract SoccerBetting is AutomationCompatibleInterface {
 
     function performUpkeep(bytes calldata performData) external override {
         emit ReceivedPerformUpkeep(performData);
-        uint256[] memory matchIds = abi.decode(performData, (uint256[]));
+    
+        (uint256[] memory matchIds) = abi.decode(performData, (uint256[]));
 
         for (uint256 i = 0; i < matchIds.length; i++) {
             uint256 matchId = matchIds[i];

@@ -2,7 +2,7 @@ import '@nomiclabs/hardhat-ethers';
 import { ethers } from "hardhat";
 import { SoccerBetting } from '../typechain-types';
 
-const CONTRACT_ADDRESS = '0x0B6B504a3762902b7362dAAe6d288DCDA9bE409F';
+const CONTRACT_ADDRESS = '0x78B7B2c04ED93dA8856390f3EF3b0633fCe6E36d';
 
 const MatchState = ['Active', 'ResultRequested', 'Resolved'];
 const Result = ['Draw', 'Home', 'Away'];
@@ -44,7 +44,7 @@ async function getMatchDetails(matchId: number) {
 }
 
 async function main() {
-    await getMatchDetails(1208847);
+    await getMatchDetails(1231794);
 }
 
 main()

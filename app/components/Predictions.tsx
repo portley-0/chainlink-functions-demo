@@ -6,7 +6,7 @@ import axios from 'axios';
 import { SoccerBetting, SoccerBetting__factory } from "../../typechain-types";
 import { useMetaMask } from '../context/MetaMask';
 
-const CONTRACT_ADDRESS = '0x0B6B504a3762902b7362dAAe6d288DCDA9bE409F';
+const CONTRACT_ADDRESS = '0x78B7B2c04ED93dA8856390f3EF3b0633fCe6E36d';
 
 interface MatchInfo {
   home: { name: string; logo: string };

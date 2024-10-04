@@ -3,10 +3,10 @@ import { ethers } from "hardhat";
 import { SoccerBetting__factory } from "../typechain-types";
 
 async function main() {
-  const CONTRACT_ADDRESS = '0x0B6B504a3762902b7362dAAe6d288DCDA9bE409F';
+  const CONTRACT_ADDRESS = '0x78B7B2c04ED93dA8856390f3EF3b0633fCe6E36d';
   
-  const matchId = 1208847; 
-  const timestamp = 1728000000; 
+  const matchId =   1231794; 
+  const timestamp = 1728069300; 
   const result = 1; 
   const betAmount = ethers.utils.parseEther("0.0001");
 
